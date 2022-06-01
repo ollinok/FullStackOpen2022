@@ -2,10 +2,9 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-  "title": "elellelelelele",
-  "author": "Pertti",
-  "url": "http://testi.test",
-  "likes": 645
+  "title": "Hauki on kala",
+  "author": "Simo",
+  "url": "http://testi.test"
 }
 
 // SCHEMA
