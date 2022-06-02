@@ -48,9 +48,9 @@ describe('add blog posts', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/);
 
-    const newBlogPosts = await helper.blogPostsInDb();
-    expect(newBlogPosts).toHaveLength(helper.initialBlogPosts.length + 1);
-    expect(newBlogPosts).toContainEqual(response.body);
+    const blogsAtEnd = await helper.blogPostsInDb();
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogPosts.length + 1);
+    expect(blogsAtEnd).toContainEqual(response.body);
   });
 
   test('if "likes" is not defined, give it a value of 0', async () => {
@@ -84,6 +84,51 @@ describe('add blog posts', () => {
     await api
       .post('/api/blogs')
       .send(newBlogPost2)
+      .expect(400);
+  });
+});
+
+describe('remove blog posts', () => {
+  test('a blog post is deleted from the db', async () => {
+    const blogToBeRemoved = await helper.singleBlogPostInDb();
+
+    await api
+      .delete(`/api/blogs/${blogToBeRemoved.id}`)
+      .expect(204);
+
+    const blogsAtEnd = await helper.blogPostsInDb();
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogPosts.length - 1);
+    expect(blogsAtEnd).not.toContainEqual(blogToBeRemoved);
+  });
+
+  test('if "id" is invalid, return code 400', async () => {
+    const id = 'asdf';
+
+    await api
+      .delete(`/api/blogs/${id}`)
+      .expect(400);
+  });
+});
+
+describe('update blog posts', () => {
+  test('update a single blog posts "likes" count by 1', async () => {
+    const blogToBeUpdated = await helper.singleBlogPostInDb();
+    const updatedLikes = { likes: blogToBeUpdated.likes + 1 };
+
+    const response = await api
+      .put(`/api/blogs/${blogToBeUpdated.id}`)
+      .send(updatedLikes)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    expect(response.body).toMatchObject(updatedLikes);
+  });
+
+  test('if "id" is invalid, return code 400', async () => {
+    const id = 'asdf';
+
+    await api
+      .put(`/api/blogs/${id}`)
       .expect(400);
   });
 });
